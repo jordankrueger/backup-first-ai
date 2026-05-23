@@ -6,7 +6,7 @@ Thanks for helping make AI coding agents safer to adopt. This project is small o
 
 - **Found a rule that's wrong or out of date?** Open an issue using the "Incorrect or outdated guardrail" template. Claude Code changes fast, and a stale instruction is worth fixing quickly.
 - **Have a guardrail to suggest?** Open an issue using the "Suggest a guardrail" template, or open a pull request.
-- **Just have a question?** Use [Discussions](https://github.com/CampaignHelp/backup-first-ai/discussions) rather than an issue.
+- **Just have a question?** Use [Discussions](https://github.com/jordankrueger/backup-first-ai/discussions) rather than an issue.
 
 ## The bar for changes
 

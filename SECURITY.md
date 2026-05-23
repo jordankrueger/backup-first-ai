@@ -4,8 +4,8 @@ This repository contains *advice and example configuration*, not running softwar
 
 ## Reporting a problem
 
-- **A guardrail here is wrong, unsafe, or could backfire?** That is the most valuable report we can get. [Open a private security advisory](https://github.com/CampaignHelp/backup-first-ai/security/advisories/new) if it's sensitive, or a normal issue if it isn't.
-- **A general "is this safe?" question?** Use [Discussions](https://github.com/CampaignHelp/backup-first-ai/discussions).
+- **A guardrail here is wrong, unsafe, or could backfire?** That is the most valuable report we can get. [Open a private security advisory](https://github.com/jordankrueger/backup-first-ai/security/advisories/new) if it's sensitive, or a normal issue if it isn't.
+- **A general "is this safe?" question?** Use [Discussions](https://github.com/jordankrueger/backup-first-ai/discussions).
 
 ## Scope and honesty
 
