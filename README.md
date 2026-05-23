@@ -1,5 +1,10 @@
 # Claude Code guardrails
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Built for Claude Code](https://img.shields.io/badge/built%20for-Claude%20Code-d97757.svg)](https://code.claude.com/docs)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Questions? Discussions](https://img.shields.io/badge/questions-discussions-8957e5.svg)](https://github.com/CampaignHelp/backup-first-ai/discussions)
+
 A starter set of safety defaults for [Claude Code](https://code.claude.com/docs), built for people who are not security engineers.
 
 Copy a file, flip on one setting, do a short checklist. It is a strong starting point you can put in place in a few minutes — not a complete shield, and the honest limits are spelled out below.
