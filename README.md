@@ -63,11 +63,13 @@ One specific gotcha worth calling out: even with the sandbox on, Claude Code's *
 
 **Want it to fail closed?** By default, if the sandbox can't start, Claude Code warns you and runs commands *without* it. To make that a hard stop instead, add `"failIfUnavailable": true` inside the `sandbox` block, and `"allowUnsandboxedCommands": false` to remove the agent's ability to retry a blocked command outside the sandbox. These are stricter and safer, but they can also get in your way — turn them on once the basics feel comfortable.
 
-## The companion reading
+## The companion notebook
 
-`sources.md` is the full reading list behind these defaults — incident write-ups, the prompt-injection research, the OWASP agentic risk list, and the official Claude Code security docs. It's organized by topic, so you can jump straight to whatever you're worried about.
+All of the research behind these defaults is loaded into a public NotebookLM you can ask plain-language questions of — *"why does this rule exist?"*, *"is what I'm about to do risky?"* — instead of reading every source yourself.
 
-If you'd like all of it loaded into a NotebookLM you can ask plain-language questions of (*"why does this rule exist?"*, *"is what I'm about to do risky?"*), you can build one from `sources.md` in a couple of minutes — or ask the maintainer for access to a hosted copy.
+**[Open the companion notebook →](https://notebooklm.google.com/notebook/221cbc78-1703-4dab-ae80-f9141a8c1a5f)** (a free Google account is needed to view it.)
+
+Prefer your own copy, or don't use Google? `sources.md` has the full reading list, organized by topic, and you can rebuild the notebook from it in a couple of minutes.
 
 ## An honest word
 
