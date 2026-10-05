@@ -1,6 +1,7 @@
 {
   "sandbox": {
     "enabled": true,
+    "autoAllowBashIfSandboxed": false,
     "filesystem": {
       "denyRead": ["~/.ssh", "~/.aws", "~/.config/gcloud"]
     }

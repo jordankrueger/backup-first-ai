@@ -34,7 +34,7 @@ You do not need to understand any of that deeply to be safe. You need a few sens
 ## Quick start
 
 1. **Copy `CLAUDE.md`** into the top folder of your project. Claude Code reads it automatically.
-2. **Turn on the sandbox.** In Claude Code, run `/sandbox` and choose a mode. On a Mac there is nothing to install. (See the [sandbox docs](https://code.claude.com/docs/en/sandboxing) for Linux/WSL setup.)
+2. **Turn on the sandbox.** In Claude Code, run `/sandbox`. On the Mode tab, pick **Regular permissions** if you still want to approve each command before it runs. The other choice, auto-allow, runs every sandboxed command without asking, including ones that change or delete files in your project. On a Mac there is nothing to install. On Windows, run Claude Code inside WSL2: **native Windows has no sandbox at all**, so commands run unprotected there. (See the [sandbox docs](https://code.claude.com/docs/en/sandboxing) for Linux and WSL2 setup.)
 3. **Borrow from `settings.example.json`.** Open it, read the comments in this README below, and copy the parts that fit into your own `.claude/settings.json`. Adapt before using — do not paste blindly.
 4. **Do the "out of its reach" checklist** below. This is the part that actually saves you.
 
@@ -45,8 +45,8 @@ This is the most important thing to understand, and most guides skip it.
 - **`CLAUDE.md` rules are soft.** The agent reads them and almost always follows them. But a cleverly worded file or web page can sometimes talk it out of them. Think of these as a good employee handbook: followed in good faith, not physically enforced.
 - **Permission rules and the sandbox are harder.** These are two different mechanisms, and it helps to know which is which:
   - *Permission rules* (the `permissions` block in settings) are enforced by Claude Code itself, before it uses one of its own tools. A `deny` rule stops Claude from reading or editing what you've blocked.
-  - *The sandbox* is enforced by your operating system, on the shell commands the agent runs and anything those commands start. It is the stronger of the two, because it holds regardless of what the model decided to do.
-  - They cover different things, so use both. One consequence worth knowing: blocking a file with a permission rule stops Claude's *own* reader, but a shell command like `cat secrets.txt` is governed by the *sandbox* instead. That's exactly why the credential note further down matters.
+  - *The sandbox* is enforced by your operating system, on the shell commands the agent runs and anything those commands start. It is the stronger of the two, because it holds regardless of what the model decided to do. It covers shell commands only: MCP servers, hooks, and Claude's own file tools run outside it.
+  - They cover different things, so use both. One consequence worth knowing: a permission rule blocks Claude's own reader and simple commands that name the file, like `cat secrets.txt`. It does not stop a command that reads without naming the file (`grep -r password .`) or a script that opens it. Only the sandbox catches those. That's exactly why the credential note further down matters.
 - **The backup is the hardest guardrail of all**, because it lives somewhere the agent has no access to at all.
 
 None of these is perfect. The soft rules prevent everyday mistakes; the permission and sandbox limits contain a bad day; the backup makes the worst day recoverable. Layer all of them.
@@ -57,16 +57,20 @@ The whole thesis, made concrete. None of these are things you tell the AI. They 
 
 - [ ] **A backup the agent cannot delete.** Versioned and offsite or append-only — somewhere the credentials on this machine cannot reach. If your "backup" uses the same login the agent can use, it is not a backup from the agent's point of view.
 - [ ] **Least-privilege credentials.** Give the agent's environment the narrowest access that still gets the job done. Don't hand it a key that can wipe production when it only needs to read one folder.
-- [ ] **Sandbox on.** Filesystem and network isolation enforced by the OS, for the commands the agent runs. See `settings.example.json`. Note: if the sandbox can't start, Claude Code warns you and runs *without* it unless you tell it to fail closed (see below).
+- [ ] **Sandbox on.** Filesystem and network isolation enforced by the OS, for the commands the agent runs. See `settings.example.json`. Note: if the sandbox can't start, Claude Code runs commands *without* it unless you tell it to fail closed (see below).
 - [ ] **Spending caps.** Put a hard cap on any API key the agent can use, so a runaway loop costs you a coffee, not a mortgage payment.
 
 ## Block the agent from reading your credentials
 
 One specific gotcha worth calling out: even with the sandbox on, Claude Code's *default* still lets commands **read** sensitive files like `~/.ssh` and `~/.aws/credentials`. It only blocks *writes* outside your project by default. If you keep cloud or SSH keys in the usual places, add them to `denyRead` (see `settings.example.json`) so a tricked agent can't read them and send them somewhere.
 
-**Tradeoff to know:** blocking `~/.ssh` and `~/.aws` can also break legitimate tools that need those keys — pushing to git over SSH, the AWS or Google Cloud command-line tools, some deploy scripts. That is the point (those are exactly the keys you don't want a tricked agent reading), but if a normal command suddenly fails, this is the first place to look. Unblock the specific path you need and leave the rest closed.
+**Tradeoff to know:** blocking `~/.ssh` and `~/.aws` can also break legitimate tools that need those keys — the AWS or Google Cloud command-line tools, some deploy scripts. That is the point (those are exactly the keys you don't want a tricked agent reading), but if a normal command suddenly fails, this is the first place to look. Unblock the specific path you need and leave the rest closed.
 
-**Want it to fail closed?** By default, if the sandbox can't start, Claude Code warns you and runs commands *without* it. To make that a hard stop instead, add `"failIfUnavailable": true` inside the `sandbox` block, and `"allowUnsandboxedCommands": false` to remove the agent's ability to retry a blocked command outside the sandbox. These are stricter and safer, but they can also get in your way — turn them on once the basics feel comfortable.
+**Git over SSH on a Mac is a separate problem.** `git fetch`, `git pull`, and `git push` to an SSH remote fail inside the sandbox on macOS whether or not `~/.ssh` is blocked, so unblocking it won't help. Switch the remote to HTTPS, or add `"excludedCommands": ["git fetch *", "git pull *", "git push *"]` inside the `sandbox` block. See [the docs](https://code.claude.com/docs/en/sandboxing#git-over-ssh-fails-with-the-sandbox-on).
+
+**Say no to any prompt that says "unsandboxed."** When the sandbox blocks a command, Claude can ask to retry it outside the sandbox. That retry is how a blocked read of your keys could get through, and if you once clicked "don't ask again" on a similar command, it may go through without asking at all. The setting below turns the retry off.
+
+**Want it to fail closed?** By default, if the sandbox can't start, Claude Code runs commands *without* it. To make that a hard stop instead, add `"failIfUnavailable": true` inside the `sandbox` block, and `"allowUnsandboxedCommands": false` to remove the agent's ability to retry a blocked command outside the sandbox. These are stricter and safer, but they can also get in your way — turn them on once the basics feel comfortable.
 
 ## The companion notebook
 
@@ -82,4 +86,4 @@ No setup is bulletproof. Prompt injection in particular has no complete technica
 
 ## License
 
-[MIT](LICENSE). Use it, fork it, adapt it for your team.
+[MIT](LICENSE). The written material (this README, `CLAUDE.md`, `sources.md`) is also available under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Use it, fork it, adapt it for your team.
