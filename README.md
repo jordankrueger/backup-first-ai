@@ -30,6 +30,7 @@ You do not need to understand any of that deeply to be safe. You need a few sens
 - **`CLAUDE.md`** — drop-in rules you paste into your project. These are *instructions* the agent reads and generally follows.
 - **`settings.example.json`** — example *limits* that Claude Code and your operating system enforce, so they hold even when the agent is confused or tricked. (These are two different layers — explained below.)
 - **`hooks/`** — an optional script that refuses a short list of disastrous commands before they run. Setup is under "Optional: block the worst commands" below.
+- **`BACKUPS.md`** — how to back up your computer, a client's website, Google Workspace or Microsoft 365, and your servers, with one copy the agent can't delete. Includes a prompt to have Claude walk you through it.
 - **`sources.md`** — the research these defaults are drawn from, so you can check the reasoning yourself.
 
 ## Quick start
@@ -56,7 +57,7 @@ None of these is perfect. The soft rules prevent everyday mistakes; the permissi
 
 The whole thesis, made concrete. None of these are things you tell the AI. They are things you put beyond it.
 
-- [ ] **A backup the agent cannot delete.** Versioned and offsite or append-only — somewhere the credentials on this machine cannot reach. If your "backup" uses the same login the agent can use, it is not a backup from the agent's point of view.
+- [ ] **A backup the agent cannot delete.** Versioned and offsite or append-only — somewhere the credentials on this machine cannot reach. If your "backup" uses the same login the agent can use, it is not a backup from the agent's point of view. [`BACKUPS.md`](BACKUPS.md) walks through setting one up.
 - [ ] **Least-privilege credentials.** Give the agent's environment the narrowest access that still gets the job done. Don't hand it a key that can wipe production when it only needs to read one folder.
 - [ ] **Sandbox on.** Filesystem and network isolation enforced by the OS, for the commands the agent runs. See `settings.example.json`. Note: if the sandbox can't start, Claude Code runs commands *without* it unless you tell it to fail closed (see below).
 - [ ] **Spending caps.** Put a hard cap on any API key the agent can use, so a runaway loop costs you a coffee, not a mortgage payment.
