@@ -2,7 +2,7 @@
 name: Incorrect or outdated guardrail
 about: A rule, claim, or setting here is wrong or no longer matches how Claude Code works
 title: "[Fix] "
-labels: ["correction"]
+labels: ["documentation"]
 ---
 
 **What's wrong**
