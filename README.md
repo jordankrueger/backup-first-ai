@@ -35,7 +35,7 @@ You do not need to understand any of that deeply to be safe. You need a few sens
 
 1. **Copy `CLAUDE.md`** into the top folder of your project. Claude Code reads it automatically.
 2. **Turn on the sandbox.** In Claude Code, run `/sandbox`. On the Mode tab, pick **Regular permissions** if you still want to approve each command before it runs. The other choice, auto-allow, runs every sandboxed command without asking, including ones that change or delete files in your project. On a Mac there is nothing to install. On Windows, run Claude Code inside WSL2: **native Windows has no sandbox at all**, so commands run unprotected there. (See the [sandbox docs](https://code.claude.com/docs/en/sandboxing) for Linux and WSL2 setup.)
-3. **Borrow from `settings.example.json`.** Open it, read the comments in this README below, and copy the parts that fit into your own `.claude/settings.json`. Adapt before using — do not paste blindly.
+3. **Borrow from `settings.example.json`.** Open it, read the sections below that explain each part (JSON files can't hold comments, so the explanations live here), and copy the parts that fit into your own `.claude/settings.json`. Adapt before using — do not paste blindly.
 4. **Do the "out of its reach" checklist** below. This is the part that actually saves you.
 
 ## Soft guardrails vs. hard guardrails
@@ -66,11 +66,23 @@ One specific gotcha worth calling out: even with the sandbox on, Claude Code's *
 
 **Tradeoff to know:** blocking `~/.ssh` and `~/.aws` can also break legitimate tools that need those keys — the AWS or Google Cloud command-line tools, some deploy scripts. That is the point (those are exactly the keys you don't want a tricked agent reading), but if a normal command suddenly fails, this is the first place to look. Unblock the specific path you need and leave the rest closed.
 
-**Git over SSH on a Mac is a separate problem.** `git fetch`, `git pull`, and `git push` to an SSH remote fail inside the sandbox on macOS whether or not `~/.ssh` is blocked, so unblocking it won't help. Switch the remote to HTTPS, or add `"excludedCommands": ["git fetch *", "git pull *", "git push *"]` inside the `sandbox` block. See [the docs](https://code.claude.com/docs/en/sandboxing#git-over-ssh-fails-with-the-sandbox-on).
+**Secrets in environment variables are a separate gap.** Commands inside the sandbox inherit Claude Code's environment, so an API key you've exported in your shell (`GITHUB_TOKEN`, `OPENAI_API_KEY` and so on) is readable by them even with the files above blocked. On Claude Code v2.1.187 or later you can strip named variables from sandboxed commands with a `credentials` block inside `sandbox`:
+
+```json
+"credentials": {
+  "envVars": [
+    { "name": "GITHUB_TOKEN", "mode": "deny" }
+  ]
+}
+```
+
+List each variable by name; there's no built-in list. A tool that needs one of them will stop working inside the sandbox, the same tradeoff as above. See [Protect credentials](https://code.claude.com/docs/en/sandboxing#protect-credentials).
+
+**Git over SSH on a Mac is a separate problem.** `git fetch`, `git pull`, and `git push` to an SSH remote fail inside the sandbox on macOS whether or not `~/.ssh` is blocked, so unblocking it won't help. Switch the remote to HTTPS, or add `"excludedCommands": ["git fetch *", "git pull *", "git push *"]` inside the `sandbox` block. Excluded commands run completely outside the sandbox and can reach any host, so HTTPS is the safer of the two. See [the docs](https://code.claude.com/docs/en/sandboxing#git-over-ssh-fails-with-the-sandbox-on).
 
 **Say no to any prompt that says "unsandboxed."** When the sandbox blocks a command, Claude can ask to retry it outside the sandbox. That retry is how a blocked read of your keys could get through, and if you once clicked "don't ask again" on a similar command, it may go through without asking at all. The setting below turns the retry off.
 
-**Want it to fail closed?** By default, if the sandbox can't start, Claude Code runs commands *without* it. To make that a hard stop instead, add `"failIfUnavailable": true` inside the `sandbox` block, and `"allowUnsandboxedCommands": false` to remove the agent's ability to retry a blocked command outside the sandbox. These are stricter and safer, but they can also get in your way — turn them on once the basics feel comfortable.
+**Want it to fail closed?** By default, if the sandbox can't start, Claude Code runs commands *without* it. To make that a hard stop instead, add `"failIfUnavailable": true` inside the `sandbox` block, and `"allowUnsandboxedCommands": false` to remove the agent's ability to retry a blocked command outside the sandbox (the `/sandbox` Overrides tab calls this **Strict sandbox mode**). These are stricter and safer, but they can also get in your way — turn them on once the basics feel comfortable.
 
 ## The companion notebook
 

@@ -45,3 +45,4 @@ The research behind these defaults. Grouped by topic. Every link is to a primary
 
 - Anthropic — [Making Claude Code more secure and autonomous with sandboxing](https://www.anthropic.com/engineering/claude-code-sandboxing)
 - Claude Code Docs — [Configure the sandboxed Bash tool](https://code.claude.com/docs/en/sandboxing)
+- Claude Code Docs — [Configure permissions](https://code.claude.com/docs/en/permissions)
