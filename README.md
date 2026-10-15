@@ -29,6 +29,7 @@ You do not need to understand any of that deeply to be safe. You need a few sens
 
 - **`CLAUDE.md`** — drop-in rules you paste into your project. These are *instructions* the agent reads and generally follows.
 - **`settings.example.json`** — example *limits* that Claude Code and your operating system enforce, so they hold even when the agent is confused or tricked. (These are two different layers — explained below.)
+- **`hooks/`** — an optional script that refuses a short list of disastrous commands before they run. Setup is under "Optional: block the worst commands" below.
 - **`sources.md`** — the research these defaults are drawn from, so you can check the reasoning yourself.
 
 ## Quick start
@@ -59,6 +60,7 @@ The whole thesis, made concrete. None of these are things you tell the AI. They 
 - [ ] **Least-privilege credentials.** Give the agent's environment the narrowest access that still gets the job done. Don't hand it a key that can wipe production when it only needs to read one folder.
 - [ ] **Sandbox on.** Filesystem and network isolation enforced by the OS, for the commands the agent runs. See `settings.example.json`. Note: if the sandbox can't start, Claude Code runs commands *without* it unless you tell it to fail closed (see below).
 - [ ] **Spending caps.** Put a hard cap on any API key the agent can use, so a runaway loop costs you a coffee, not a mortgage payment.
+- [ ] **GitHub push protection on.** GitHub can refuse a push that contains a recognizable API key or password. "Push protection for yourself" is on by default and covers public repositories; check it under Settings → Code security. Private repositories need GitHub's paid Secret Protection for the same check. See [GitHub's docs](https://docs.github.com/en/code-security/how-tos/secure-your-secrets/prevent-future-leaks/push-protection-for-users).
 
 ## Block the agent from reading your credentials
 
@@ -83,6 +85,30 @@ List each variable by name; there's no built-in list. A tool that needs one of t
 **Say no to any prompt that says "unsandboxed."** When the sandbox blocks a command, Claude can ask to retry it outside the sandbox. That retry is how a blocked read of your keys could get through, and if you once clicked "don't ask again" on a similar command, it may go through without asking at all. The setting below turns the retry off.
 
 **Want it to fail closed?** By default, if the sandbox can't start, Claude Code runs commands *without* it. To make that a hard stop instead, add `"failIfUnavailable": true` inside the `sandbox` block, and `"allowUnsandboxedCommands": false` to remove the agent's ability to retry a blocked command outside the sandbox (the `/sandbox` Overrides tab calls this **Strict sandbox mode**). These are stricter and safer, but they can also get in your way — turn them on once the basics feel comfortable.
+
+## Optional: block the worst commands
+
+A *hook* is a small script Claude Code runs before each command. `hooks/block-dangerous-commands.sh` refuses a short list of commands that are almost never intended: deleting your whole disk or home folder, force-pushing over `main`, erasing a drive, and SQL that drops or empties a table. Everything else runs as normal.
+
+1. Copy `hooks/block-dangerous-commands.sh` into your project at `.claude/hooks/`, and make it runnable: `chmod +x .claude/hooks/block-dangerous-commands.sh`
+2. Add this to your `.claude/settings.json`, next to the other settings:
+
+   ```json
+   "hooks": {
+     "PreToolUse": [
+       {
+         "matcher": "Bash",
+         "hooks": [
+           { "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-dangerous-commands.sh" }
+         ]
+       }
+     ]
+   }
+   ```
+
+3. Check it works: from this repo, run `bash hooks/test.sh`. It needs `jq`, which comes with macOS 15 and later (on Linux or WSL2, `sudo apt install jq`). **Without `jq` the hook quietly lets everything through**, which is why the test checks for it.
+
+**Where this sits.** A hook reads the text of a command, so a reworded version (`/bin/rm` instead of `rm`) can get past it. That makes it stronger than `CLAUDE.md`, because the agent can't be talked out of it, but weaker than the sandbox, which the operating system enforces. It catches the everyday slip. It is not a wall. See the [hooks docs](https://code.claude.com/docs/en/hooks).
 
 ## The companion notebook
 

@@ -1,0 +1,33 @@
+# Test cases for block-dangerous-commands.sh, read by test.sh.
+# Format: block|<command> or allow|<command>. Nothing here is ever run.
+
+block|rm -rf /
+block|sudo rm -rf / --no-preserve-root
+block|rm -rf /*
+block|rm -rf ~
+block|rm -rf ~/
+block|rm -r -f $HOME
+block|rm -rf ${HOME}/ && echo done
+block|find ~ -name "*.log" -delete
+block|find / -type f -delete
+block|git push --force origin main
+block|git push -f origin master
+block|dd if=/dev/zero of=/dev/disk2
+block|diskutil eraseDisk APFS Blank disk4
+block|mkfs.ext4 /dev/sdb1
+block|psql -c "DROP TABLE users;"
+block|mysql -e "truncate table orders"
+block|sqlite3 app.db "DELETE FROM users;"
+block|sqlite3 app.db "DELETE FROM users"
+
+allow|rm -rf build/
+allow|rm -rf ~/projects/app/node_modules
+allow|rm -rf ./dist /tmp/cache
+allow|find . -name "*.pyc" -delete
+allow|find ~/Downloads -name "*.tmp" -delete
+allow|git push origin main
+allow|git push --force origin feature-branch
+allow|sqlite3 app.db "DELETE FROM sessions WHERE expires < 100;"
+allow|diskutil list
+allow|ls -la /
+allow|echo hello

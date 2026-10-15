@@ -15,8 +15,8 @@ This pack is aimed at people who are *not* security engineers. So:
 - **Plain language.** If a sentence needs a security background to parse, rewrite it.
 - **Accurate over impressive.** Don't oversell what a config can do. Cite a source for any security or product claim (see `sources.md` for the style).
 - **Don't break beginners.** Settings that could lock someone out of their own tools by default belong behind a clearly labeled "stricter" note, not in the base example.
-- **No telemetry, no dependencies.** This stays a handful of plain files anyone can read top to bottom.
+- **No telemetry, no dependencies.** This stays a handful of plain files anyone can read top to bottom. The one exception is the optional hook in `hooks/`, which needs `jq`; keep it optional and short.
 
 ## Pull requests
 
-Keep them focused and small. Explain what changed and why in the description. There's no build step and no test suite — just clear, correct prose and config.
+Keep them focused and small. Explain what changed and why in the description. There's no build step. If you change the hook, add a case to `hooks/test-cases.txt` and run `bash hooks/test.sh`.

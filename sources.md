@@ -46,3 +46,5 @@ The research behind these defaults. Grouped by topic. Every link is to a primary
 - Anthropic — [Making Claude Code more secure and autonomous with sandboxing](https://www.anthropic.com/engineering/claude-code-sandboxing)
 - Claude Code Docs — [Configure the sandboxed Bash tool](https://code.claude.com/docs/en/sandboxing)
 - Claude Code Docs — [Configure permissions](https://code.claude.com/docs/en/permissions)
+- Claude Code Docs — [Hooks reference](https://code.claude.com/docs/en/hooks)
+- GitHub Docs — [Push protection for users](https://docs.github.com/en/code-security/how-tos/secure-your-secrets/prevent-future-leaks/push-protection-for-users)
