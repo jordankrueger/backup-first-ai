@@ -36,18 +36,22 @@ CubeBackup is a self-hosted backup for both Google Workspace and Microsoft 365. 
 
 ## Putting a copy out of reach
 
-This is the step that turns a disaster into an inconvenience. Two ways to do it, and you can use both:
+This is the step that turns a disaster into an inconvenience. Use retention protection and restricted credentials together:
 
-1. **Storage that refuses deletes.** Backblaze B2 (from $6.95 per TB per month) and Amazon S3 both offer Object Lock, which stops anyone from deleting or overwriting a file until a date you choose. In compliance mode, nobody can remove the lock, not even the account owner. ([B2 pricing](https://www.backblaze.com/cloud-storage/pricing), [B2 Object Lock](https://www.backblaze.com/docs/cloud-storage-object-lock), [S3 Object Lock](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html))
-2. **A key that can add files but not delete them.** B2 lets you create application keys with only the permissions you pick, so the machine doing the backup can write new files and still has no delete permission. ([B2 keys](https://www.backblaze.com/docs/cloud-storage-application-keys))
+1. **Storage that retains protected versions.** Backblaze B2 (from $6.95 per TB per month) and Amazon S3 both offer Object Lock, which prevents permanent deletion of a protected file version until a date you choose. In compliance mode, nobody can shorten that retention, not even the account owner. Set a retention period that covers how long a mistake might go unnoticed, and confirm it applies to the actual backup versions. Enabling Object Lock alone does not put every version under retention. A newer upload or hide marker may still conceal a protected version, so you also need to know how to restore that older version. ([B2 pricing](https://www.backblaze.com/cloud-storage/pricing), [B2 Object Lock](https://www.backblaze.com/docs/cloud-storage-object-lock), [S3 Object Lock](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html))
+2. **A restricted backup key.** B2 lets you create application keys with only the permissions your backup tool needs. Keep permissions to delete backup versions, change retention or lifecycle settings, and bypass governance retention off the agent's machine. A key without delete permission is an extra protection, not a substitute for retention. ([B2 keys](https://www.backblaze.com/docs/cloud-storage-application-keys))
+
+**Why a no-delete key is not enough:** B2's `writeFiles` permission also allows hiding files, and uploading a new version hides the old one. Lifecycle rules can then permanently delete those hidden versions. With "Keep only the last version," an unprotected old version becomes eligible for deletion after one day, at a later daily lifecycle run. Check the bucket's lifecycle settings and verify that your recovery versions remain protected for the whole retention period. ([B2 hide-file API](https://www.backblaze.com/apidocs/b2-hide-file), [B2 lifecycle rules](https://www.backblaze.com/docs/en/cloud-storage-lifecycle-rules))
 
 For servers and databases, [restic](https://restic.readthedocs.io/en/stable/) is a free, open-source tool that encrypts backups and sends them to B2 or S3. Store its password somewhere other than the server. Without the password, the backup can't be read, by you or anyone else.
 
-Never give the AI agent the login for your backup storage. If the agent's environment can run the backup, give it the write-only key and nothing more.
+Never give the AI agent the administrator login for your backup storage. If the agent's environment can run the backup, give it only restricted backup credentials; keep credentials that can remove recovery copies or change their protection somewhere it cannot reach.
 
 ## Test the restore
 
 A backup you've never restored from is a guess. Once a quarter, pick one file, one site or one database table and actually bring it back. Time it, and write down the steps. On the bad day, you'll be glad you didn't have to work them out.
+
+During setup, also use a disposable test file to check retention: confirm it has a retain-until date, upload a replacement or hide it, and recover the original version. Check that the backup key cannot permanently delete that protected version or shorten its retention. Keep the recovery instructions with the separate administrator credentials.
 
 ## Have Claude help you set it up
 
@@ -67,8 +71,9 @@ Help me set up backups using the "3-2-1, with one copy out of reach" approach.
 4. Walk me through one item at a time. Explain each step before I do it.
 
 Rules: Don't delete, overwrite or move any existing files or backups. Don't
-create or ask me for storage credentials that can delete backups; use
-write-only keys or Object Lock where possible. Never ask me to paste a
+create or ask me for storage credentials that can delete recovery copies or
+weaken their protection; use restricted keys together with verified retention.
+Test retention only with disposable test files. Never ask me to paste a
 password or key into the chat. End with a restore test for each item.
 ```
 

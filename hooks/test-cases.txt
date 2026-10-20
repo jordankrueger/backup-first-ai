@@ -1,5 +1,6 @@
 # Test cases for block-dangerous-commands.sh, read by test.sh.
-# Format: block|<command> or allow|<command>. Nothing here is ever run.
+# Format: block|<command>, allow|<command>, or invalid|<raw JSON>.
+# Command strings are only passed to the hook, never executed.
 
 block|rm -rf /
 block|sudo rm -rf / --no-preserve-root
@@ -31,3 +32,14 @@ allow|sqlite3 app.db "DELETE FROM sessions WHERE expires < 100;"
 allow|diskutil list
 allow|ls -la /
 allow|echo hello
+
+invalid|{broken
+invalid|{}
+invalid|{"tool_input":{"command":null}}
+invalid|{"tool_input":{"command":123}}
+invalid|{"tool_input":{"command":false}}
+invalid|{"tool_input":{"command":[]}}
+invalid|{"tool_input":{"command":{}}}
+invalid|{"tool_input":{"command":""}}
+invalid|{"tool_input":{"command":"echo hello"}} {"tool_input":{"command":"echo goodbye"}}
+invalid|

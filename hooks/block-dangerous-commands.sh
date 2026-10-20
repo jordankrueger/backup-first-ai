@@ -7,15 +7,18 @@
 # The sandbox and your backup are the real protection.
 #
 # Exit 2 = blocked; the message below is shown to Claude.
-# Needs jq (built into macOS 15 and later; `apt install jq` on Linux/WSL2).
-
-COMMAND=$(jq -r '.tool_input.command // empty' 2>/dev/null)
-[ -z "$COMMAND" ] && exit 0
+# Needs jq and grep; blocks if either is missing or input is invalid.
+# jq is built into macOS 15 and later; `apt install jq` on Linux/WSL2.
 
 block() {
   echo "BLOCKED by block-dangerous-commands.sh: $1. If you really mean it, ask the human to run it themselves." >&2
   exit 2
 }
+
+command -v jq >/dev/null 2>&1 || block "jq is not installed; install it before using this hook"
+command -v grep >/dev/null 2>&1 || block "grep is not installed; restore it before using this hook"
+COMMAND=$(jq -ers 'select(length == 1) | .[0].tool_input.command | select(type == "string" and length > 0)' 2>/dev/null) ||
+  block "invalid hook input; expected one JSON object with a non-empty Bash command"
 
 # A path ends at whitespace, end of line, or a shell separator.
 END='([[:space:];&|)]|$)'

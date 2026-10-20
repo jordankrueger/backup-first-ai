@@ -92,7 +92,7 @@ List each variable by name; there's no built-in list. A tool that needs one of t
 A *hook* is a small script Claude Code runs before each command. `hooks/block-dangerous-commands.sh` refuses a short list of commands that are almost never intended: deleting your whole disk or home folder, force-pushing over `main`, erasing a drive, and SQL that drops or empties a table. Everything else runs as normal.
 
 1. Copy `hooks/block-dangerous-commands.sh` into your project at `.claude/hooks/`, and make it runnable: `chmod +x .claude/hooks/block-dangerous-commands.sh`
-2. Add this to your `.claude/settings.json`, next to the other settings:
+2. Use Claude Code **v2.1.295 or later**, then add this to your `.claude/settings.json`, next to the other settings. Quoting the script path handles folders with spaces. `onFailure: "block"` stops the tool call if the hook is missing, crashes, or times out. ([Hook failure docs](https://code.claude.com/docs/en/hooks#block-the-action-when-a-hook-fails))
 
    ```json
    "hooks": {
@@ -100,14 +100,21 @@ A *hook* is a small script Claude Code runs before each command. `hooks/block-da
        {
          "matcher": "Bash",
          "hooks": [
-           { "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-dangerous-commands.sh" }
+           { "type": "command", "command": "\"${CLAUDE_PROJECT_DIR}/.claude/hooks/block-dangerous-commands.sh\"", "onFailure": "block" }
          ]
        }
      ]
    }
    ```
 
-3. Check it works: from this repo, run `bash hooks/test.sh`. It needs `jq`, which comes with macOS 15 and later (on Linux or WSL2, `sudo apt install jq`). **Without `jq` the hook quietly lets everything through**, which is why the test checks for it.
+3. Check it works: from this repo, run `bash hooks/test.sh`. It checks the command rules, invalid input, missing dependencies, and the README's registration in a temporary project folder with spaces. The hook needs `jq`, which comes with macOS 15 and later (on Linux or WSL2, `sudo apt install jq`), and `grep`. **If either is missing, or the input is invalid, the hook blocks the command and explains why.** Fix the dependency or input before continuing.
+
+4. In your own project, check the copied hook with the command below. It must print `BLOCKED` and `exit: 2`. The proposed command is only JSON input to the hook; it is never executed. Then start a new Claude Code session and use `/hooks` to confirm the Bash hook is registered. This checks your installation as well as the repository's tests.
+
+   ```bash
+   printf '%s\n' '{"tool_name":"Bash","tool_input":{"command":"rm -rf ~"}}' | .claude/hooks/block-dangerous-commands.sh
+   printf 'exit: %s\n' "$?"
+   ```
 
 **Where this sits.** A hook reads the text of a command, so a reworded version (`/bin/rm` instead of `rm`) can get past it. That makes it stronger than `CLAUDE.md`, because the agent can't be talked out of it, but weaker than the sandbox, which the operating system enforces. It catches the everyday slip. It is not a wall. See the [hooks docs](https://code.claude.com/docs/en/hooks).
 
